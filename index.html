@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>LOCAL HUE BCI</title>
+        <style>
+            body{
+                font-family: verdana;
+                margin: 20px;
+                color:#3E1929;
+            }
+            h1{
+                margin: 0px;
+                font-size: 20px;
+                color:#3E1929;
+            }
+            h2{
+                font-size: 16px;
+                margin-top: 20px;
+                color:#3E1929;
+            }
+            #buttons{
+                clear: left;
+            }
+            input{
+                width: 100%;
+            }
+            form{
+                background: #B0DAF1;
+                width: 500px;
+                padding: 20px;
+                -webkit-border-radius: 10px;
+                -moz-border-radius: 10px;
+            }
+            textarea{
+                padding-top: 10px;
+                width: 100%;
+                font-family: monaco,monospace;
+                font-size: 12px;
+                -webkit-border-radius: 10px;
+                -moz-border-radius: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <form name="commandform">
+            <h1>HUE COMMANDS</h1>
+            <h2>HUE: enter 153(blue) --> 500(orange)</h2>
+            <input name="commandurl" type="text" size="60" value="153">
+            <div id="buttons">
+                <button type="button" onclick="turnLights('on')">LIGHTS ON</button>
+                <button type="button" onclick="turnLights('off')">LIGHTS OFF</button>
+                <button type="button" onclick="gradientLights()">CHANGE COLOR</button>
+                <!-- <button type="button" onclick="getHTML('GET')">GET</button>
+                <button type="button" onclick="getHTML('PUT')">PUT</button>
+                <button type="button" onclick="getHTML('POST')">POST</button>
+                <button type="button" onclick="getHTML('DELETE')">DELETE</button> -->
+            </div>
+            <!-- <h2>Message Body:</h2>
+            <textarea name="messagebody" rows="10" cols="100"></textarea> -->
+            <h2>Command Response:</h2>
+            <textarea name="response" rows="25" cols="100"></textarea>
+        </form>
+    </body>
+</html>
+
+<script language="JavaScript">
+    var lightsState = "http://10.242.66.72/api/NG7-B5Njc5cM9ldqTwi9bpsUvjIMZnxScHg6njZR/lights/1/state";
+
+    function gradientLights(){
+        // ct runs from 153 to 500 -- changes color
+        // bri runs from 0 to 254 --changes brightness
+        // sat runs from 0 to 254 -- doesnt do anything
+        var color = document.commandform.commandurl.value;
+        var gradCommand = '{"on":true, "sat":254, "bri":50,"ct":'+color+'}';
+        if (window.XMLHttpRequest)
+        {
+            var http = new XMLHttpRequest();
+            http.open('PUT', lightsState, true);
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState == 4)
+                {
+                    if(http.status==200)
+                    {
+                        document.commandform.response.value="Bad JSON: "+http.responseText
+                        document.commandform.response.value=JSON.stringify(JSON.parse(http.responseText), null, '\t');
+                    }
+                    else
+                    {
+                        document.commandform.response.value="Error "+http.status + document.commandform.commandurl.value
+                    }
+                }
+            }
+            http.send(gradCommand);
+        }
+        return false;
+    }
+
+    function turnLights(command){
+        if (command == "on"){
+            bodyCommand = '{"on":true}';
+        }
+        else{
+            bodyCommand = '{"on":false}';
+        }
+
+        if (window.XMLHttpRequest)
+        {
+            var http = new XMLHttpRequest();
+            http.open('PUT', lightsState, true);
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState == 4)
+                {
+                    if(http.status==200)
+                    {
+                        document.commandform.response.value="Bad JSON: "+http.responseText
+                        document.commandform.response.value=JSON.stringify(JSON.parse(http.responseText), null, '\t');
+                    }
+                    else
+                    {
+                        document.commandform.response.value="Error "+http.status + document.commandform.commandurl.value
+                    }
+                }
+            }
+            http.send(bodyCommand);
+        }
+        return false;
+    }
+</script>
+
